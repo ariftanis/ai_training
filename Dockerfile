@@ -5,12 +5,13 @@ FROM nvidia/cuda:13.0.1-cudnn-devel-ubuntu24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# Install Python, the venv module, and other system dependencies
-RUN apt-get update && apt-get install -y \
-    python3.12 \
-    python3.12-venv \
+# Install Python (generic), the venv module, and other system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-venv \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python
 
 # Create a virtual environment and add it to the PATH
 ENV VIRTUAL_ENV=/opt/venv
