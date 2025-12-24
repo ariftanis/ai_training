@@ -5,19 +5,25 @@ FROM nvidia/cuda:13.0.1-cudnn-devel-ubuntu24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# Install Python and other system dependencies
+# Install Python, the venv module, and other system dependencies
 RUN apt-get update && apt-get install -y \
     python3.12 \
-    python3-pip \
+    python3.12-venv \
     git \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a virtual environment and add it to the PATH
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file and install Python dependencies
+# Copy the requirements file and install Python dependencies into the virtual environment
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
+# The 'pip' command will now automatically use the one from the virtual environment
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
 
 # Copy the source code and the entrypoint script
 COPY src/ ./src/
