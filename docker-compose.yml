@@ -5,6 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      # Mount the documents directory to provide data for preparation
+      - ./documents:/app/documents:ro
+      # Mount the dataset file so it's persisted after creation
+      - ./dataset.jsonl:/app/dataset.jsonl
+      # Mount the output model directory to persist the trained model on your host machine
+      - ./my-finetuned-model:/app/my-finetuned-model
     deploy:
       resources:
         reservations:
@@ -12,6 +19,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    # The container will run the default CMD from the Dockerfile.
-    # To run with a custom prompt, you can use:
-    # docker-compose run qlora-llm python3 src/inference.py "Your prompt here"
+    # When running `docker-compose up`, the default CMD from the Dockerfile will be used.
+    # To run inference with a custom prompt, use the `run` command:
+    # docker-compose run --rm qlora-llm python3 src/inference.py "Your custom prompt here"
