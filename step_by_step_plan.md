@@ -34,7 +34,7 @@ This plan outlines the process of preparing a dataset, fine-tuning a Large Langu
     *   The script loads the `dataset.jsonl`, fine-tunes the base model using QLoRA, and saves the resulting adapter weights to the `./my-finetuned-model` directory.
 
 6.  **Run the Training Process:**
-    *   Execute the training script: `python src/train.py`. This is a long-running, resource-intensive process. Thanks to the `tqdm` library, a progress bar will be displayed in your terminal, showing the percentage complete and time elapsed.
+    *   Execute the training script: `python src/train.py`. This is a long-running, resource-intensive process. You will see logs indicating the model download progress, followed by a `tqdm` progress bar for the training steps.
     *   Upon completion, verify that the `my-finetuned-model/` directory has been created.
 
 ### Phase 3: Model Export and GGUF Conversion

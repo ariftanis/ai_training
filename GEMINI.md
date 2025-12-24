@@ -38,7 +38,7 @@ docker-compose up
 
 1.  **First-Time Run (Training):**
     *   If you are running this for the first time, the system will detect that no trained model exists.
-    *   It will automatically prepare the dataset and then begin the **fine-tuning process**. A progress bar will be displayed.
+    *   It will automatically prepare the dataset and then begin the **fine-tuning process**. You will see logs showing the model download status, followed by a progress bar for the training itself.
     *   This is a long, resource-intensive process that can take many hours.
     *   Once complete, the newly fine-tuned model will be saved to a `my-finetuned-model/` directory in your project folder. The container will then run inference with a default prompt.
 

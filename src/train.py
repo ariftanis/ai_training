@@ -1,8 +1,21 @@
+import logging
+import sys
 from unsloth import FastLanguageModel
 from trl import SFTTrainer
 from transformers import TrainingArguments
 from datasets import load_dataset
 import torch
+
+# =================================================================================
+# Configure logging to show download progress from huggingface_hub
+# =================================================================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    stream=sys.stdout,
+)
+# =================================================================================
+
 
 # 1. Load the dataset
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
@@ -34,12 +47,14 @@ max_seq_length = 8192  # Adjust based on your content length
 
 
 # 4. Load model and tokenizer
+print(">>> Loading model and tokenizer...")
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_name,
     max_seq_length=max_seq_length,
     dtype=None,  # Auto-detect (bfloat16 on your GPU)
     load_in_4bit=True,  # QLoRA
 )
+print(">>> Model and tokenizer loaded successfully.")
 
 # 5. Add LoRA adapters
 model = FastLanguageModel.get_peft_model(
@@ -63,7 +78,7 @@ trainer = SFTTrainer(
         per_device_train_batch_size=2,  # Reduced batch size to prevent OOM errors
         gradient_accumulation_steps=4, # Keep effective batch size of 8
         warmup_steps=100,
-        max_steps=1000,  # Or num_train_epochs=3; monitor for overfitting
+        num_train_epochs=3, # Use epochs for more robust training that adapts to dataset size
         learning_rate=2e-4,
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
@@ -75,12 +90,12 @@ trainer = SFTTrainer(
 )
 
 # 7. Train!
-print("Starting model training...")
+print("\n>>> Starting model training...")
 trainer.train()
-print("Training finished.")
+print(">>> Training finished.")
 
 # 8. Save the model
-print("Saving fine-tuned model...")
+print("\n>>> Saving fine-tuned model...")
 model.save_pretrained("my-finetuned-model")
 tokenizer.save_pretrained("my-finetuned-model")
-print("Model saved to 'my-finetuned-model'")
+print(">>> Model saved to 'my-finetuned-model'")
