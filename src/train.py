@@ -14,6 +14,14 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     stream=sys.stdout,
 )
+
+# Enable detailed logging for transformers
+import transformers
+transformers.utils.logging.set_verbosity_info()
+
+# Enable huggingface_hub progress bars
+import huggingface_hub
+huggingface_hub.utils.tqdm.disable = False
 # =================================================================================
 
 
@@ -46,8 +54,13 @@ model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"  # Pre-quantized for 
 max_seq_length = 8192  # Adjust based on your content length
 
 
-# 4. Load model and tokenizer
+# 4. Enhanced download progress tracking
+print(">>> Preparing to download model and tokenizer...")
+print(f">>> Model: {model_name}")
+
+# Ensure progress bars are enabled (redundant call removed - already set in main config)
 print(">>> Loading model and tokenizer...")
+# The download progress should now be visible
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=model_name,
     max_seq_length=max_seq_length,
