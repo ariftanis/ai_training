@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  qlora-llm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # The container will run the default CMD from the Dockerfile.
+    # To run with a custom prompt, you can use:
+    # docker-compose run qlora-llm python3 src/inference.py "Your prompt here"

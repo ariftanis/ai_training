@@ -1,0 +1,11 @@
+torch
+torchvision
+torchaudio
+unsloth
+trl
+peft
+accelerate
+bitsandbytes
+datasets
+transformers
+tqdm
