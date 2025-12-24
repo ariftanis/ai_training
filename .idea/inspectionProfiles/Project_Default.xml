@@ -1,0 +1,33 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="django" />
+          <option value="djangorestframework" />
+          <option value="django-cors-headers" />
+          <option value="psycopg2-binary" />
+          <option value="PyMuPDF" />
+          <option value="scikit-learn" />
+          <option value="beautifulsoup4" />
+          <option value="html2text" />
+          <option value="nltk" />
+          <option value="tenacity" />
+          <option value="requests" />
+          <option value="python-dotenv" />
+          <option value="gunicorn" />
+          <option value="markdown" />
+          <option value="bleach" />
+          <option value="ollama" />
+          <option value="sentence-transformers" />
+          <option value="hf_xet" />
+          <option value="huggingface_hub" />
+          <option value="torch" />
+          <option value="pytz" />
+          <option value="langchain" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

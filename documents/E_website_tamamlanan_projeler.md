@@ -1,0 +1,65 @@
+## TAMAMLANAN PROJELER
+
+Belediye Başkanı Sn.Alper YEĞİN'in Sancaktepe belediye başkanı olduğu dönemden Kasım 2025'e kadar 61 proje tamamlandı. Projelerin listesi aşağıdaki gibidir.  Bu projelerle ilgili ayrıntılı bilgi için Sancaktepe Belediyesi Resmi web sayfası Tamamlanan Projeler sayfasını ziyaret edebilirsiniz.
+
+- Osman Gazi Mahallesi Samandıra Mahalle Evi
+- Akpınar Mahalle Evi
+- Paşaköy Mahalle Evi
+- Abdurrahmangazi Mahallesi Samandıra Atatürk Parkı
+- Abdurrahmangazi Mahallesi Samandıra Cumhuriyet Meydanı
+- Akpınar Mahallesi Yuvamız Sancaktepe
+- Fatih Mahallesi Yuvamız Sancaktepe
+- İnönü Mahallesi Yuvamız Sancaktepe
+- Mevlana Mahallesi Yuvamız Sancaktepe
+- Abdurrahmangazi Mahallesi Sosyal Cafe Koru
+- Abdurrahmangazi Mahallesi Sosyal Cafe Samandıra
+- İnönü Mahallesi Sosyal Cafe Sarıgazi
+- İnönü Mahallesi Sarıgazi Zabıta Noktası
+- Abdurrahmangazi Mahallesi Koru Park
+- Veysel Karani Mahallesi Sırrı Süreya Önder Spor Parkı
+- Paşaköy Mahallesi Spor Parkı
+- Kemal Türkler Mahallesi Muhtar Kazım Özmen Spor Parkı
+- Hilal Mahallesi Tarım Sokak Spor Parkı
+- Eyüp Sultan Mahallesi Samandıra Futbol Tesisi
+- Fatih Mahallesi Şiir Sokak Parkı ve Halı Saha
+- Yenidoğan Mahallesi Akın Caddesi Parkı ve Halı Saha
+- Yenidoğan Sağlık İşleri Müdürlüğü
+- Eyüp Sultan Mahallesi Ayhan&Cahit Gülan Aile Sağlığı Merkezi
+- Osman Gazi Mahallesi Musa Meral Aile Sağlığı Merkezi
+- Osman Gazi Mahalle Muhtarlığı
+- Merve Mahallesi Spor Salonu
+- Hilal Mahallesi Spor Salonu
+- Safa Mahallesi Spor Salonu
+- Eyüp Sultan Mahallesi Şamil Gülan Spor Salonu
+- Yenidoğan Mahallesi Sancaktepe Çözüm Ofisi
+- İnönü Mahallesi Sancaktepe Çözüm Ofisi (Sarıgazi)
+- Akpınar Mahallesi Polis Karakolu
+- Hilal Mahallesi Merkez Camii
+- Abdurrahmangazi Mahallesi Samandıra Saat Kulesi Meydanı
+- İnönü Mahallesi Prestij Caddesi ve Yayalaştırma Projesi
+- Sarıgazi Mahallesi Feriha Öz Pandemi Hastanesi Kreş Çevre Düzenlemesi
+- Osman Gazi Mahallesi Dere Spor Tesisleri
+- Meclis Mahallesi Metin Göktepe Parkı
+- Eyüp Sultan Mahallesi İstiklal Parkı
+- Akpınar Mahallesi Yiğitler Sokak Parkı
+- İnönü Mahallesi Gülhanım Şahin Parkı
+- Atatürk Mahallesi Şehit Eşref Bitlis Parkı ve Halı Saha
+- Atatürk Mahallesi Şehit Satılmış Yıldırım Parkı
+- İnönü Mahallesi Mertcan Oyun Sokağı
+- Meclis Mahallesi Yunus Emre Parkı ve Halı Saha
+- Kemal Türkler Mahallesi Necip Fazıl Kısakürek Parkı ve Halı Saha
+- Veysel Karani Mahallesi Aydos Millet Bahçesi Bostanları
+- Paşaköy Lavanta Bahçesi
+- Osman Gazi Mahallesi Hasan Bayrak Parkı
+- Osman Gazi Mahallesi Yunus Okumuş Parkı ve Halı Saha
+- Abdurrahmangazi Mahallesi Şehit Sedat Bugan Parkı ve Halı Saha
+- Kemal Türkler Mahallesi Lalezar Parkı ve Halı Saha
+- Abdurrahmangazi Mahallesi Mehtap Parkı ve Halı Saha
+- İnönü Mahallesi Nazım Hikmet Parkı ve Halı Saha
+- Osman Gazi Mahallesi Aziz Bayraktar İHL Halı Saha
+- Akpınar Mahallesi Cengiz Topel İÖO Halı Saha
+- Kemal Türkler Mahallesi Osman Gazi Parkı
+- Eyüp Sultan Mahallesi Mehmet Akif Ersoy Parkı Halı Saha
+- Merve Mahallesi Çayırlı Parkı ve Halı Saha
+- Mevlana Mahallesi Ridvan Dilmen Halı Saha 1
+- Mevlana Mahallesi Ridvan Dilmen Halı Saha 2
