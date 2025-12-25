@@ -85,20 +85,19 @@ model = FastLanguageModel.get_peft_model(
 import os
 os.environ["HF_DATASETS_NUM_PROC"] = "2"  # Alternative way to set number of processes
 
-# 6. Trainer
-# Ensure psutil is available in trainer's context by patching sys.modules if needed
-import sys
-if 'psutil' not in sys.modules:
-    import psutil
-    sys.modules['psutil'] = psutil
+# Make sure global namespace has psutil for Unsloth compiled files
+import psutil
+import builtins
+builtins.psutil = psutil
 
+# 6. Trainer
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
     train_dataset=dataset,
     dataset_text_field="text",  # Use the combined text field
     max_seq_length=max_seq_length,
-    dataset_num_proc=2,  # Add this parameter to bypass the psutil error ryzen 9800x has 8 cores
+    # dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
     args=TrainingArguments(
         per_device_train_batch_size=2,
         gradient_accumulation_steps=4,
