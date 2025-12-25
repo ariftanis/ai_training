@@ -1,6 +1,12 @@
 import logging
 import sys
 import psutil
+
+# Set environment variables to avoid CUDA compilation issues
+import os
+os.environ["CUDA_HOME"] = "/usr/local/cuda"
+os.environ["TRITON_CACHE_DIR"] = "/tmp/triton_cache"
+
 from unsloth import FastLanguageModel
 from trl import SFTTrainer
 from transformers import TrainingArguments
