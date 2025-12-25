@@ -57,8 +57,8 @@ dataset = dataset.map(formatting_prompts_func, batched = True,)
 
 
 # 3. Model Configuration
-model_name = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"  # Smaller, faster model for testing
-max_seq_length = 4096  # Reduced for smaller model
+model_name = "unsloth/Phi-3-medium-4k-instruct"  # Smaller yet capable model
+max_seq_length = 4096  # Phi-3-medium supports up to 4k context length
 
 
 # 4. Enhanced download progress tracking
