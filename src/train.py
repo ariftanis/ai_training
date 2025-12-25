@@ -1,5 +1,6 @@
 import logging
 import sys
+import psutil
 from unsloth import FastLanguageModel
 from trl import SFTTrainer
 from transformers import TrainingArguments
