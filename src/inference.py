@@ -7,24 +7,22 @@ def run_inference(prompt):
     Loads the fine-tuned model and runs inference on the given prompt.
     """
     model_path = "my-finetuned-model"
-    
+
     # Load the model and tokenizer
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=model_path,
         dtype=None,
         load_in_4bit=True,
     )
-    
+
     # Set the model to inference mode
     FastLanguageModel.for_inference(model)
 
-    # Format the prompt using Alpaca format
+    # Format the prompt using the same Alpaca format used during training
     alpaca_prompt = f"""### Instruction:
-You are a helpful assistant with knowledge about the Sancaktepe municipality. Based on the provided context, answer questions truthfully.
-
+You are a specialized AI assistant for Sancaktepe municipality services. Your role is to handle various types of user queries using a multi-agent approach. When users ask questions about municipal services, provide accurate information based on the context provided. For greetings, respond politely. For inappropriate queries, respond respectfully while redirecting to appropriate topics. Be helpful and concise in Turkish.
 ### Input:
 {prompt}
-
 ### Response:
 """
 
@@ -32,12 +30,13 @@ You are a helpful assistant with knowledge about the Sancaktepe municipality. Ba
     inputs = tokenizer([alpaca_prompt], return_tensors="pt").to("cuda")
 
     # Generate the response
-    outputs = model.generate(**inputs, max_new_tokens=200)
+    outputs = model.generate(**inputs, max_new_tokens=200, pad_token_id=tokenizer.eos_token_id)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    
+
     # Print only the response part
     response_start = response.find("### Response:") + len("### Response:")
-    print(response[response_start:].strip())
+    response_content = response[response_start:].strip()
+    print(response_content)
 
 
 if __name__ == '__main__':

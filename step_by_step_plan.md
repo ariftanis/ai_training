@@ -1,70 +1,122 @@
 # Step-by-Step TODO Plan: QLoRA LLM Fine-Tuning and Dockerization
 
-This plan outlines the process of preparing a dataset, fine-tuning a Large Language Model (LLM), converting it to GGUF for efficient inference, and packaging it into a Docker container. For the fine-tuning process, the **Llama 3.1 8B Instruct model** will be used, specifically the `unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit` variant due to its efficiency with QLoRA.
+This plan outlines the process of preparing a dataset, fine-tuning a Large Language Model (LLM) using Unsloth's optimized approach, converting it to GGUF for efficient inference, and packaging it into a Docker container. For initial testing, the **Phi-3.5-mini-instruct model** will be used, specifically the `unsloth/Phi-3.5-mini-instruct` variant due to its small size for quick testing. Once validated, we can scale up to larger models like Phi-3-medium-4k-instruct.
 
 ## System Environment
 
 *   **Operating System:** Ubuntu 24.04 LTS
 *   **CUDA Support:** Fully enabled and supported by the system drivers. This allows for GPU acceleration during model training and inference.
+*   **CUDA Base Image:** nvidia/cuda:13.0.1-cudnn-devel-ubuntu24.04 with additional packages python3-dev and build-essential for compilation needs
 
 ### Phase 1: Project Setup and Data Preparation
 
 1.  **Initialize Project Structure:**
-    *   Create a `src` directory for Python scripts.
+    *   Ensure a `src` directory exists for Python scripts.
+    *   Create necessary directories: `documents/` for source files, `outputs/` for model outputs.
 
-2.  **Set Up Python Environment:**
-    *   Create a Python virtual environment (e.g., `python -m venv .venv`).
-    *   Activate the virtual environment.
-
-3.  **Install Dependencies:**
-    *   Install all necessary libraries using pip:
+2.  **Install Dependencies:**
+    *   Install all necessary libraries using pip as per `requirements.txt`:
         ```bash
         pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
-        pip install "unsloth[cu130] @ git+https://github.com/unslothai/unsloth.git"
+        pip install unsloth
+        pip install psutil  # Added to resolve runtime issues with Unsloth compiled cache
         pip install --no-deps "trl" "peft" "accelerate" "bitsandbytes"
-        pip install datasets transformers
+        pip install datasets transformers tqdm
         ```
 
-4.  **Create Data Preparation Script (`src/prepare_dataset.py`):**
-    *   This script reads all `.md` and `.json` files from the `documents/` directory, converts them into a structured JSONL format using the Alpaca standard, and saves the result to `dataset.jsonl`.
+3.  **Create Data Preparation Script (`src/prepare_dataset.py`):**
+    *   This script reads all `.md` and `.json` files from the `documents/` directory.
+    *   Converts them into the Alpaca format with EOS_TOKEN for proper training.
+    *   Uses the format: "Instruction: {instruction}, Input: {input}, Response: {output}{EOS_TOKEN}"
+    *   Saves the result to `dataset.jsonl` in the root directory.
 
 ### Phase 2: Model Training
 
-5.  **Create Training Script (`src/train.py`):**
-    *   The script loads the `dataset.jsonl`, fine-tunes the base model using QLoRA, and saves the resulting adapter weights to the `./my-finetuned-model` directory.
+4.  **Configure Model Parameters:**
+    *   Set `max_seq_length = 2048` for initial tiny model testing (can be increased to 4096+ for larger models).
+    *   Use `dtype = None` for auto-detection of bfloat16.
+    *   Use `load_in_4bit = True` for memory-efficient QLoRA training.
 
-6.  **Run the Training Process:**
-    *   Execute the training script: `python src/train.py`. This is a long-running, resource-intensive process. You will see logs indicating the model download progress, followed by a `tqdm` progress bar for the training steps.
-    *   Upon completion, verify that the `my-finetuned-model/` directory has been created.
+5.  **Configure LoRA Parameters:**
+    *   Set `r = 64` for LoRA rank (suggested values: 8, 16, 32, 64, 128) - can be adjusted for larger models.
+    *   Target modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"].
+    *   Use `lora_alpha = 16` and `lora_dropout = 0`.
+    *   Use `use_gradient_checkpointing = "unsloth"` for VRAM optimization.
+
+6.  **Create Training Script (`src/train.py`):**
+    *   Load the `dataset.jsonl` with Alpaca formatting including EOS_TOKEN.
+    *   Fine-tune the base model using QLoRA with proper dataset_num_proc setting to avoid psutil errors.
+    *   Use SFTTrainer with appropriate parameters: batch size, gradient accumulation, learning rate.
+    *   Save the resulting adapter weights to the `./my-finetuned-model` directory.
+
+7.  **Run the Training Process:**
+    *   Execute the training script: `python src/train.py` or via Docker: `docker-compose up`.
+    *   Monitor training with logging_steps and progress tracking.
+    *   Upon completion, verify that the `my-finetuned-model/` directory has been created with proper adapter files.
 
 ### Phase 3: Model Export and GGUF Conversion
 
-7.  **Create GGUF Export Script (`src/export_gguf.py`):**
-    *   This script will first merge the LoRA adapters from `my-finetuned-model/` into the base model, saving the result to a new directory (`my-finetuned-merged/`).
-    *   It will then automatically clone the `llama.cpp` repository (if not already present), install its dependencies, and use its conversion tools to create a GGUF file (e.g., `sancaktepe-model.gguf`).
+8.  **Create GGUF Export Script (`src/export_gguf.py`):**
+    *   This script will first merge the LoRA adapters from `my-finetuned-model/` into the base model using `save_pretrained_merged`.
+    *   It will then automatically handle GGUF conversion using Unsloth's native GGUF support or llama.cpp.
+    *   Creates a GGUF file (e.g., `sancaktepe-model.gguf`) in the project root.
 
-8.  **Run the GGUF Export Process:**
-    *   Execute the export script: `python src/export_gguf.py`.
-    *   Verify that the `.gguf` model file is created in the root directory. This single file is now a portable, high-performance version of your fine-tuned model.
+9.  **Run the GGUF Export Process:**
+    *   Execute the export script: `python src/export_gguf.py` after training is complete.
+    *   Verify that the `.gguf` model file is created in the root directory.
+    *   Supports various quantization methods: q4_k_m (recommended), q8_0, f16, etc.
 
 ### Phase 4: Dockerization and Deployment
 
-9.  **Create `requirements.txt`:**
-    *   Generate a `requirements.txt` file with all the project dependencies: `pip freeze > requirements.txt`.
+10. **Update `requirements.txt`:**
+    *   Ensure `psutil` is included in dependencies to resolve runtime issues.
 
-10. **Create Inference Script (`src/inference.py`):**
-    *   This script loads the fine-tuned model (the Hugging Face version, not the GGUF) and runs inference. It serves as a way to test the model outside of a GGUF-based environment.
+11. **Update `Dockerfile`:**
+    *   Use base image: `nvidia/cuda:13.0.1-cudnn-devel-ubuntu24.04`.
+    *   Install `python3-dev` and `build-essential` for CUDA compilation requirements.
+    *   Copy and install requirements before copying source code for better caching.
+    *   Set up entrypoint script to handle first-time training vs inference mode.
 
-11. **Write the `Dockerfile`:**
-    *   Create a `Dockerfile` that uses a base image like `nvidia/cuda:13.0.1-cudnn-devel-ubuntu24.04`, copies the necessary scripts and the Hugging Face model, and sets up the environment to run inference.
+12. **Create Inference Script (`src/inference.py`):**
+    *   This script loads the fine-tuned model and runs inference in Alpaca format.
+    *   Uses `FastLanguageModel.for_inference(model)` for 2x faster inference.
+    *   Supports custom prompts via command-line arguments.
 
-12. **Create `docker-compose.yml` file:**
-    *   Create a `docker-compose.yml` file to simplify container management and ensure GPU access for running the Hugging Face model format.
+13. **Update `docker-compose.yml` file:**
+    *   Configure GPU access via NVIDIA Container Toolkit.
+    *   Set up volume mounts for persistent model storage and document access.
+    *   Implement logic to skip training on subsequent runs when model exists.
 
-13. **Build and Test with Docker Compose:**
+14. **Update `entrypoint.sh`:**
+    *   Check for existing model files before starting training.
+    *   Run dataset preparation if training is needed.
+    *   Execute training script if no model exists.
+    *   Execute inference script as default command.
+
+15. **Build and Test with Docker Compose:**
     *   Build and run the service using: `docker-compose up --build`.
+    *   First run: prepares dataset, trains model, saves to persistent directory.
+    *   Subsequent runs: skips training and runs inference directly.
 
-### Phase 5: Documentation
+### Phase 5: Documentation and Optimization
 
-14. **Update `GEMINI.md`:**
-    *   Add sections to `GEMINI.md` explaining the GGUF conversion process and how to use the final GGUF model with tools like Ollama or LM Studio.
+16. **Update Documentation:**
+    *   Update `GEMINI.md` with current workflows and model choices.
+    *   Document the Docker-based training and inference process.
+    *   Explain how to run custom inference commands.
+
+17. **Performance Optimization:**
+    *   Use Unsloth's optimized settings for faster training and inference.
+    *   Configure proper memory management with gradient checkpointing.
+    *   Adjust batch sizes and accumulation steps based on available VRAM.
+    *   Scale parameters appropriately when moving to larger models.
+
+18. **Scalability:**
+    *   Test with tiny model first to verify Docker setup works.
+    *   Gradually increase model size and parameters as needed.
+    *   Monitor resource usage and adjust accordingly.
+
+19. **Troubleshooting:**
+    *   Address psutil NameError by ensuring availability in all contexts.
+    *   Handle CUDA compilation errors by including necessary development packages.
+    *   Properly format datasets with EOS_TOKEN to avoid infinite generation issues.

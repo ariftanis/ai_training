@@ -40,37 +40,46 @@ def export_to_gguf():
         load_in_4bit=True,
     )
 
-    model.save_pretrained_merged(merged_model_path, tokenizer, save_method="merged_16bit")
-    print(f"Model successfully merged and saved to '{merged_model_path}'")
+    # Use Unsloth's built-in method for GGUF conversion if available (newer versions)
+    try:
+        model.save_pretrained_gguf(gguf_output_path, tokenizer, quantization_method="q8_0")
+        print(f"✅ Successfully created GGUF model at: {gguf_output_path} using Unsloth's built-in method")
+        print("You can now use this file with tools like Ollama or LM Studio.")
+        return
+    except AttributeError:
+        print(">>> Unsloth's built-in GGUF conversion not available, using llama.cpp method...")
+        # Fallback to manual merging and conversion
+        model.save_pretrained_merged(merged_model_path, tokenizer, save_method="merged_16bit")
+        print(f"Model successfully merged and saved to '{merged_model_path}'")
 
-    # --- 2. Set up llama.cpp for GGUF Conversion ---
-    print("\n>>> Step 2: Setting up llama.cpp for GGUF conversion...")
-    if not os.path.exists(llama_cpp_repo):
-        print(f"'{llama_cpp_repo}' not found. Cloning from GitHub...")
-        run_command("git clone https://github.com/ggerganov/llama.cpp.git")
-    else:
-        print(f"'{llama_cpp_repo}' directory already exists.")
-    
-    # Install llama.cpp dependencies
-    print("Installing llama.cpp Python requirements...")
-    run_command(f"pip install -r {os.path.join(llama_cpp_repo, 'requirements.txt')}")
+        # --- 2. Set up llama.cpp for GGUF Conversion ---
+        print(">>> Step 2: Setting up llama.cpp for GGUF conversion...")
+        if not os.path.exists(llama_cpp_repo):
+            print(f"'{llama_cpp_repo}' not found. Cloning from GitHub...")
+            run_command("git clone https://github.com/ggerganov/llama.cpp.git")
+        else:
+            print(f"'{llama_cpp_repo}' directory already exists.")
 
-    # --- 3. Convert to GGUF ---
-    print("\n>>> Step 3: Converting the merged model to GGUF format...")
-    convert_script_path = os.path.join(llama_cpp_repo, "convert.py")
-    
-    # We use f16 (float16) as it's a common and compatible type for GGUF conversion.
-    # Other types like q4_k_m can be used for smaller file sizes.
-    conversion_command = (
-        f"python {convert_script_path} {merged_model_path}"
-        f" --outfile {gguf_output_path}"
-        f" --outtype f16" # Using f16 for high quality, can be changed to q4_k_m for smaller size
-    )
-    
-    run_command(conversion_command)
+        # Install llama.cpp dependencies
+        print("Installing llama.cpp Python requirements...")
+        run_command(f"pip install -r {os.path.join(llama_cpp_repo, 'requirements.txt')}")
 
-    print(f"\n✅ Successfully created GGUF model at: {gguf_output_path}")
-    print("You can now use this file with tools like Ollama or LM Studio.")
+        # --- 3. Convert to GGUF ---
+        print(">>> Step 3: Converting the merged model to GGUF format...")
+        convert_script_path = os.path.join(llama_cpp_repo, "convert.py")
+
+        # We use f16 (float16) as it's a common and compatible type for GGUF conversion.
+        # Other types like q4_k_m can be used for smaller file sizes.
+        conversion_command = (
+            f"python {convert_script_path} {merged_model_path}"
+            f" --outfile {gguf_output_path}"
+            f" --outtype f16" # Using f16 for high quality, can be changed to q4_k_m for smaller size
+        )
+
+        run_command(conversion_command)
+
+        print(f"\n✅ Successfully created GGUF model at: {gguf_output_path}")
+        print("You can now use this file with tools like Ollama or LM Studio.")
 
 
 if __name__ == '__main__':

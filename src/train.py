@@ -35,30 +35,9 @@ huggingface_hub.utils.tqdm.disable = False
 # 1. Load the dataset
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
 
-# 2. Format the dataset for Alpaca format
-def formatting_prompts_func(examples):
-    instructions = examples["instruction"]
-    inputs       = examples["input"]
-    outputs      = examples["output"]
-    texts = []
-    for instruction, input, output in zip(instructions, inputs, outputs):
-        text = f"""### Instruction:
-{instruction}
-
-### Input:
-{input}
-
-### Response:
-{output}"""
-        texts.append(text)
-    return { "text" : texts, }
-pass
-dataset = dataset.map(formatting_prompts_func, batched = True,)
-
-
 # 3. Model Configuration
-model_name = "unsloth/Phi-3-medium-4k-instruct"  # Smaller yet capable model
-max_seq_length = 4096  # Phi-3-medium supports up to 4k context length
+model_name = "unsloth/Phi-3.5-mini-instruct"  # Tiny model for quick testing
+max_seq_length = 2048  # Reduced for smaller model
 
 
 # 4. Enhanced download progress tracking
@@ -76,10 +55,35 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 )
 print(">>> Model and tokenizer loaded successfully.")
 
+# Add EOS_TOKEN after tokenizer is loaded
+EOS_TOKEN = tokenizer.eos_token  # Must add EOS_TOKEN at the end of each response
+
+# Format the dataset for Alpaca format with EOS_TOKEN (do it once)
+def formatting_prompts_func(examples):
+    instructions = examples["instruction"]
+    inputs       = examples["input"]
+    outputs      = examples["output"]
+    texts = []
+    for instruction, input, output in zip(instructions, inputs, outputs):
+        # Must add EOS_TOKEN at the end, otherwise generation might go on forever!
+        text = f"""### Instruction:
+{instruction}
+
+### Input:
+{input}
+
+### Response:
+{output}""" + EOS_TOKEN
+        texts.append(text)
+    return { "text" : texts, }
+pass
+dataset = dataset.map(formatting_prompts_func, batched = True,)
+
+
 # 5. Add LoRA adapters
 model = FastLanguageModel.get_peft_model(
     model,
-    r=64,  # Rank (32–128; higher = better but more VRAM)
+    r=16,  # Reduced rank for the tiny model to save memory
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     lora_alpha=16,
     lora_dropout=0,
@@ -105,9 +109,9 @@ trainer = SFTTrainer(
     max_seq_length=max_seq_length,
     dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
     args=TrainingArguments(
-        per_device_train_batch_size=1,  # Reduced for smaller model and faster testing
-        gradient_accumulation_steps=2,  # Adjusted for faster iterations
-        warmup_steps=10,  # Reduced for faster testing
+        per_device_train_batch_size=1,  # Reduced batch size to save memory for tiny model
+        gradient_accumulation_steps=4,  # Increased to maintain effective batch size
+        warmup_steps=5,  # Reduced for faster testing
         num_train_epochs=1,  # Reduced to 1 epoch for testing
         learning_rate=2e-4,
         fp16=not torch.cuda.is_bf16_supported(),
@@ -116,6 +120,7 @@ trainer = SFTTrainer(
         output_dir="outputs",
         optim="adamw_8bit",
         report_to="none",
+        remove_unused_columns=False,  # Important for custom datasets
     ),
 )
 

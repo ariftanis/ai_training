@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-This is a specialized AI project focused on creating a custom Large Language Model (LLM) for the Sancaktepe municipality in Istanbul, Turkey. The project uses QLoRA (Quantized Low-Rank Adaptation) fine-tuning to adapt a base model (Meta-Llama-3.1-8B-Instruct) to answer questions about municipal services, regulations, and general information specific to Sancaktepe.
+This is a specialized AI project focused on creating a custom Large Language Model (LLM) for the Sancaktepe municipality in Istanbul, Turkey. The project uses QLoRA (Quantized Low-Rank Adaptation) fine-tuning to adapt a base model (currently using Phi-3-medium-4k-instruct) to answer questions about municipal services, regulations, and general information specific to Sancaktepe.
 
 The project leverages Turkish municipal documents stored in the `documents/` directory as the knowledge base for training. It utilizes the Unsloth library for efficient GPU usage and provides a complete pipeline for training, inference, and conversion to GGUF format for broader deployment.
 
 ## Architecture & Technologies
 
-- **Base Model**: `unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit`
+- **Base Model**: `unsloth/Phi-3-medium-4k-instruct` (previously used Llama models, switched for better efficiency)
 - **Fine-tuning Method**: QLoRA (Quantized Low-Rank Adaptation)
 - **Framework**: PyTorch with CUDA support
 - **Optimization Library**: Unsloth (provides 2-3x faster training and 70% less VRAM usage)
@@ -19,6 +19,7 @@ The project leverages Turkish municipal documents stored in the `documents/` dir
 
 ```
 D:\ai_training\
+├── corrective_information.md
 ├── dataset.jsonl              # Generated dataset in JSONL format
 ├── docker-compose.yml         # Docker Compose configuration
 ├── Dockerfile                 # Container definition
@@ -26,7 +27,7 @@ D:\ai_training\
 ├── GEMINI.md                  # Project documentation
 ├── plan.md                    # Original planning document
 ├── QWEN.md                    # Current file (this documentation)
-├── requirements.txt           # Python dependencies
+├── requirements.txt           # Python dependencies (now includes psutil)
 ├── step_by_step_plan.md       # Step-by-step implementation plan
 ├── .idea/                     # IDE configuration
 ├── documents/                 # Source documents (Turkish municipal documents)
@@ -54,8 +55,9 @@ D:\ai_training\
 - Uses the prepared JSONL dataset for supervised fine-tuning
 - Implements QLoRA with rank=64 and alpha=16
 - Uses 4-bit quantization to minimize VRAM usage
-- Trains for 3 epochs with batch size adjustments for stability
+- Trains for 1 epoch with batch size adjustments for stability (reduced from 3 epochs for faster testing)
 - Saves the fine-tuned model to `my-finetuned-model/` directory
+- Includes fixes for psutil and CUDA compilation issues
 
 ### 3. Inference (`src/inference.py`)
 - Loads the fine-tuned model and runs inference
@@ -90,26 +92,18 @@ D:\ai_training\
    docker-compose run --rm qlora-llm python3 src/inference.py "Sancaktepe'de hangi parklar var?"
    ```
 
-### Direct Python Usage (Alternative)
-1. **Prepare dataset**:
-   ```bash
-   python src/prepare_dataset.py
-   ```
+### Model Updates
+The project now uses `unsloth/Phi-3-medium-4k-instruct` which provides:
+- Better efficiency than larger models
+- 4k context window appropriate for the tasks
+- Faster training and inference times
+- Lower resource requirements
 
-2. **Train model**:
-   ```bash
-   python src/train.py
-   ```
-
-3. **Run inference**:
-   ```bash
-   python src/inference.py "Your question here"
-   ```
-
-4. **Export to GGUF** (after training):
-   ```bash
-   python src/export_gguf.py
-   ```
+### Docker Configuration Updates
+The Dockerfile has been updated to include:
+- `python3-dev` package for compilation requirements
+- `build-essential` package for compilation tools
+- Proper CUDA environment setup for Triton compilation
 
 ## Development Conventions
 
@@ -124,8 +118,22 @@ D:\ai_training\
 The project relies on these key libraries (from `requirements.txt`):
 - `torch`, `torchvision`, `torchaudio` (with CUDA support)
 - `unsloth` (optimized for NVIDIA GPUs)
+- `psutil` (added to resolve runtime issues)
 - `trl`, `peft`, `accelerate`, `bitsandbytes` (for fine-tuning)
 - `datasets`, `transformers` (for data handling and model operations)
+
+## Known Issues and Fixes
+
+### Psutil Issue
+- **Problem**: NameError: name 'psutil' is not defined in Unsloth compiled cache files
+- **Solution**: Added psutil import and made it available in builtins namespace
+
+### CUDA Compilation Issue
+- **Problem**: Missing Python.h and compilation tools
+- **Solution**: Updated Dockerfile to include python3-dev and build-essential
+
+### Model Selection
+- **Change**: Switched from Llama-3.1-8B to Phi-3-medium-4k-instruct for better efficiency
 
 ## Usage Examples
 
@@ -142,4 +150,4 @@ The model is designed to answer questions about Sancaktepe municipality such as:
 2. **GGUF Format**: For use with Ollama, LM Studio, or other inference engines
 3. **Direct Python**: For development and testing purposes
 
-The project is optimized for the RTX 5090 with 32GB VRAM but can be adapted for other NVIDIA GPU configurations with sufficient memory.
+The project is optimized for various NVIDIA GPU configurations and provides a balance between model capability and resource efficiency.
