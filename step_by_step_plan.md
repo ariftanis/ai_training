@@ -1,6 +1,6 @@
 # Step-by-Step TODO Plan: QLoRA LLM Fine-Tuning and Dockerization
 
-This plan outlines the process of preparing a dataset, fine-tuning a Large Language Model (LLM) using Unsloth's optimized approach, converting it to GGUF for efficient inference, and packaging it into a Docker container. For initial testing, the **Phi-3.5-mini-instruct model** will be used, specifically the `unsloth/Phi-3.5-mini-instruct` variant due to its small size for quick testing. Once validated, we can scale up to larger models like Phi-3-medium-4k-instruct.
+This plan outlines the process of preparing a dataset, fine-tuning a Large Language Model (LLM) using Unsloth's optimized approach, converting it to GGUF for efficient inference, and packaging it into a Docker container. For production information injection, the **Llama 3.1 8B Instruct model** will be used, specifically the `unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit` variant due to its superior performance for knowledge injection tasks.
 
 ## System Environment
 

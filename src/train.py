@@ -36,8 +36,8 @@ huggingface_hub.utils.tqdm.disable = False
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
 
 # 3. Model Configuration
-model_name = "unsloth/Phi-3.5-mini-instruct"  # Tiny model for quick testing
-max_seq_length = 2048  # Reduced for smaller model
+model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"  # Llama 3.1 8B for real information injection
+max_seq_length = 8192  # Increased for larger model and context
 
 
 # 4. Enhanced download progress tracking
@@ -80,13 +80,13 @@ pass
 dataset = dataset.map(formatting_prompts_func, batched = True,)
 
 
-# 5. Add LoRA adapters
+# 5. Add LoRA adapters for optimal information injection
 model = FastLanguageModel.get_peft_model(
     model,
-    r=16,  # Reduced rank for the tiny model to save memory
+    r=64,  # Increased rank for better information injection with larger model
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    lora_alpha=16,
-    lora_dropout=0,
+    lora_alpha=32,  # Increased alpha for better learning
+    lora_dropout=0.1,  # Small dropout to prevent overfitting
     bias="none",
     use_gradient_checkpointing="unsloth",  # Saves VRAM
 )
@@ -100,7 +100,7 @@ import psutil
 import builtins
 builtins.psutil = psutil
 
-# 6. Trainer
+# 6. Trainer for optimal information injection
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
@@ -109,18 +109,22 @@ trainer = SFTTrainer(
     max_seq_length=max_seq_length,
     dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
     args=TrainingArguments(
-        per_device_train_batch_size=1,  # Reduced batch size to save memory for tiny model
-        gradient_accumulation_steps=4,  # Increased to maintain effective batch size
-        warmup_steps=5,  # Reduced for faster testing
-        num_train_epochs=1,  # Reduced to 1 epoch for testing
-        learning_rate=2e-4,
+        per_device_train_batch_size=1,  # Adjusted for larger model to manage memory
+        gradient_accumulation_steps=8,  # Increased for better gradient estimates
+        warmup_steps=50,  # Increased for more stable training
+        num_train_epochs=3,  # Increased epochs for better information injection
+        learning_rate=2e-4,  # Standard learning rate for LoRA
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
-        logging_steps=5,  # More frequent logging for faster feedback
+        logging_steps=10,  # Balanced logging frequency
         output_dir="outputs",
-        optim="adamw_8bit",
+        optim="adamw_8bit",  # Memory efficient optimizer
         report_to="none",
         remove_unused_columns=False,  # Important for custom datasets
+        max_grad_norm=1.0,  # Gradient clipping for stability
+        save_strategy="epoch",  # Save checkpoint at each epoch
+        save_steps=500,  # Additional save points
+        gradient_checkpointing_kwargs={"use_reentrant": False},  # To prevent potential issues
     ),
 )
 

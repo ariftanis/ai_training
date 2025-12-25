@@ -11,6 +11,11 @@ if [ ! -f "$MODEL_FILE" ]; then
     echo ">> This will take a significant amount of time."
     echo "----------------------------------------------------"
 
+    # Clean the model directory to ensure a fresh start
+    echo
+    echo ">>> Cleaning model directory for fresh start..."
+    rm -rf /app/my-finetuned-model/*
+
     # Step 1: Prepare the dataset
     echo
     echo ">>> Running dataset preparation..."
@@ -25,6 +30,15 @@ if [ ! -f "$MODEL_FILE" ]; then
     echo "----------------------------------------------------"
     echo ">> Training complete. The model is now saved."
     echo ">> Future runs will skip training and run inference."
+    echo "----------------------------------------------------"
+
+    # Step 3: Export the model to GGUF format for broader compatibility
+    echo
+    echo ">>> Converting model to GGUF format for broader compatibility..."
+    python3 src/export_gguf.py
+    echo
+    echo "----------------------------------------------------"
+    echo ">> GGUF export complete. Model is available as sancaktepe-model.gguf"
     echo "----------------------------------------------------"
 else
     echo "----------------------------------------------------"
