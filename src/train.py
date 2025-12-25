@@ -88,17 +88,18 @@ trainer = SFTTrainer(
     train_dataset=dataset,
     dataset_text_field="text",  # Use the combined text field
     max_seq_length=max_seq_length,
+    dataset_num_proc=8,  # Add this parameter to bypass the psutil error ryzen 9800x has 8 cores
     args=TrainingArguments(
-        per_device_train_batch_size=2,  # Reduced batch size to prevent OOM errors
-        gradient_accumulation_steps=4, # Keep effective batch size of 8
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=4,
         warmup_steps=100,
-        num_train_epochs=3, # Use epochs for more robust training that adapts to dataset size
+        num_train_epochs=3,
         learning_rate=2e-4,
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
         logging_steps=10,
         output_dir="outputs",
-        optim="adamw_8bit",  # VRAM efficient
+        optim="adamw_8bit",
         report_to="none",
     ),
 )
