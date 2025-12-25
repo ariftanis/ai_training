@@ -81,7 +81,17 @@ model = FastLanguageModel.get_peft_model(
     use_gradient_checkpointing="unsloth",  # Saves VRAM
 )
 
+# Prepare for potential psutil usage in Unsloth compiled functions
+import os
+os.environ["HF_DATASETS_NUM_PROC"] = "2"  # Alternative way to set number of processes
+
 # 6. Trainer
+# Ensure psutil is available in trainer's context by patching sys.modules if needed
+import sys
+if 'psutil' not in sys.modules:
+    import psutil
+    sys.modules['psutil'] = psutil
+
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
