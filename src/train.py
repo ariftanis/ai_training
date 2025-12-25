@@ -51,8 +51,8 @@ dataset = dataset.map(formatting_prompts_func, batched = True,)
 
 
 # 3. Model Configuration
-model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"  # Pre-quantized for speed
-max_seq_length = 8192  # Adjust based on your content length
+model_name = "unsloth/Llama-3.2-1B-Instruct-bnb-4bit"  # Smaller, faster model for testing
+max_seq_length = 4096  # Reduced for smaller model
 
 
 # 4. Enhanced download progress tracking
@@ -97,16 +97,16 @@ trainer = SFTTrainer(
     train_dataset=dataset,
     dataset_text_field="text",  # Use the combined text field
     max_seq_length=max_seq_length,
-    # dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
+    dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
     args=TrainingArguments(
-        per_device_train_batch_size=2,
-        gradient_accumulation_steps=4,
-        warmup_steps=100,
-        num_train_epochs=3,
+        per_device_train_batch_size=1,  # Reduced for smaller model and faster testing
+        gradient_accumulation_steps=2,  # Adjusted for faster iterations
+        warmup_steps=10,  # Reduced for faster testing
+        num_train_epochs=1,  # Reduced to 1 epoch for testing
         learning_rate=2e-4,
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
-        logging_steps=10,
+        logging_steps=5,  # More frequent logging for faster feedback
         output_dir="outputs",
         optim="adamw_8bit",
         report_to="none",
