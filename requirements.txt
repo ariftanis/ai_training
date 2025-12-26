@@ -11,3 +11,6 @@ datasets
 transformers
 tqdm
 python-dotenv
+requests
+markdown
+bleach
