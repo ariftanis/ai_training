@@ -26,9 +26,17 @@ def export_to_gguf():
     import os
     os.environ["UNSLOTH_INSTALL_FORCE_ACCEPT"] = "1"
 
+    # Load environment variables from .env file if it exists
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        # dotenv is not required, just load environment variables from system
+        pass
+
     lora_model_path = "my-finetuned-model"
     merged_model_path = "my-finetuned-merged"
-    gguf_output_path = "sancaktepe-model.gguf"
+    gguf_output_path = os.getenv("GGUF_OUTPUT_NAME", "sancaktepe-model.gguf")
     llama_cpp_repo = "llama.cpp"
 
     # --- 1. Merge LoRA Adapters ---

@@ -7,6 +7,14 @@ import os
 os.environ["CUDA_HOME"] = "/usr/local/cuda"
 os.environ["TRITON_CACHE_DIR"] = "/tmp/triton_cache"
 
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv is not required, just load environment variables from system
+    pass
+
 from unsloth import FastLanguageModel
 from trl import SFTTrainer
 from transformers import TrainingArguments
@@ -35,9 +43,9 @@ huggingface_hub.utils.tqdm.disable = False
 # 1. Load the dataset
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
 
-# 3. Model Configuration
-model_name = "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit"  # Llama 3.1 8B for real information injection
-max_seq_length = 8192  # Increased for larger model and context
+# 3. Model Configuration from environment variables
+model_name = os.getenv("MODEL_NAME", "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit")  # Default to Llama 3.1 8B
+max_seq_length = int(os.getenv("MAX_SEQ_LENGTH", "8192"))  # Increased for larger model and context
 
 
 # 4. Enhanced download progress tracking
@@ -80,49 +88,61 @@ pass
 dataset = dataset.map(formatting_prompts_func, batched = True,)
 
 
-# 5. Add LoRA adapters for optimal information injection
+# 5. Add LoRA adapters for optimal information injection from environment variables
+lora_rank = int(os.getenv("LORA_RANK", "64"))  # Increased rank for better information injection with larger model
+lora_alpha = int(os.getenv("LORA_ALPHA", "32"))  # Increased alpha for better learning
+lora_dropout = float(os.getenv("LORA_DROPOUT", "0.1"))  # Small dropout to prevent overfitting
+
 model = FastLanguageModel.get_peft_model(
     model,
-    r=64,  # Increased rank for better information injection with larger model
+    r=lora_rank,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    lora_alpha=32,  # Increased alpha for better learning
-    lora_dropout=0.1,  # Small dropout to prevent overfitting
+    lora_alpha=lora_alpha,
+    lora_dropout=lora_dropout,
     bias="none",
     use_gradient_checkpointing="unsloth",  # Saves VRAM
 )
 
 # Prepare for potential psutil usage in Unsloth compiled functions
-import os
-os.environ["HF_DATASETS_NUM_PROC"] = "2"  # Alternative way to set number of processes
+dataset_num_proc = os.getenv("DATASET_NUM_PROC", "2")
+os.environ["HF_DATASETS_NUM_PROC"] = dataset_num_proc  # Alternative way to set number of processes
 
 # Make sure global namespace has psutil for Unsloth compiled files
 import psutil
 import builtins
 builtins.psutil = psutil
 
-# 6. Trainer for optimal information injection
+# 6. Trainer for optimal information injection with environment variables
+num_epochs = int(os.getenv("NUM_EPOCHS", "3"))  # Increased epochs for better information injection
+batch_size = int(os.getenv("BATCH_SIZE", "1"))  # Adjusted for larger model to manage memory
+gradient_accumulation = int(os.getenv("GRADIENT_ACCUMULATION_STEPS", "8"))  # Increased for better gradient estimates
+warmup_steps = int(os.getenv("WARMUP_STEPS", "50"))  # Increased for more stable training
+learning_rate = float(os.getenv("LEARNING_RATE", "2e-4"))  # Standard learning rate for LoRA
+output_dir = os.getenv("OUTPUT_DIR", "outputs")
+save_strategy = os.getenv("SAVE_STRATEGY", "epoch")  # Save checkpoint at each epoch
+
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
     train_dataset=dataset,
     dataset_text_field="text",  # Use the combined text field
     max_seq_length=max_seq_length,
-    dataset_num_proc=2,  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
+    dataset_num_proc=int(dataset_num_proc),  # Add this parameter to bypass the psutil error docker my utilize 2 virtual codes generally
     args=TrainingArguments(
-        per_device_train_batch_size=1,  # Adjusted for larger model to manage memory
-        gradient_accumulation_steps=8,  # Increased for better gradient estimates
-        warmup_steps=50,  # Increased for more stable training
-        num_train_epochs=3,  # Increased epochs for better information injection
-        learning_rate=2e-4,  # Standard learning rate for LoRA
+        per_device_train_batch_size=batch_size,  # From environment variable
+        gradient_accumulation_steps=gradient_accumulation,  # From environment variable
+        warmup_steps=warmup_steps,  # From environment variable
+        num_train_epochs=num_epochs,  # From environment variable
+        learning_rate=learning_rate,  # From environment variable
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
         logging_steps=10,  # Balanced logging frequency
-        output_dir="outputs",
+        output_dir=output_dir,  # From environment variable
         optim="adamw_8bit",  # Memory efficient optimizer
         report_to="none",
         remove_unused_columns=False,  # Important for custom datasets
         max_grad_norm=1.0,  # Gradient clipping for stability
-        save_strategy="epoch",  # Save checkpoint at each epoch
+        save_strategy=save_strategy,  # From environment variable
         save_steps=500,  # Additional save points
         gradient_checkpointing_kwargs={"use_reentrant": False},  # To prevent potential issues
     ),
