@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import torch
 from unsloth import FastLanguageModel
 
 def run_command(command):
@@ -44,7 +45,6 @@ def export_to_gguf():
     lora_model_path = "my-finetuned-model"
     merged_model_path = "my-finetuned-merged"
     gguf_output_name = os.getenv("GGUF_OUTPUT_NAME", "sancaktepe-model.gguf")
-    gguf_output_path = os.path.join(output_dir, gguf_output_name)  # Save to output directory
     llama_cpp_repo = "llama.cpp"
 
     # --- 1. Merge LoRA Adapters ---
@@ -63,20 +63,40 @@ def export_to_gguf():
     # Use Unsloth's built-in method for GGUF conversion with proper quantization
     try:
         print(f">>> Using quantization method: {quantization_method}")
+        gguf_output_path = os.path.join(output_dir, gguf_output_name)
         model.save_pretrained_gguf(gguf_output_path, tokenizer, quantization_method=quantization_method)
         print(f"✅ Successfully created GGUF model at: {gguf_output_path} using Unsloth's built-in method with {quantization_method} quantization")
         print("You can now use this file with tools like Ollama or LM Studio.")
         return
     except Exception as e:
         print(f"Error during Unsloth's built-in GGUF conversion: {e}")
-        print(">>> Falling back to manual llama.cpp method...")
+        print(">>> Falling back to manual method based on your working approach...")
 
-        # Manual method as fallback
+        # --- Manual method following your successful approach ---
+        print(">>> Step 2: Loading model from adapter using standard transformers...")
+        from transformers import AutoModelForCausalLM
+
+        # Merge the LoRA adapters into the base model
         model.save_pretrained_merged(merged_model_path, tokenizer, save_method="merged_16bit")
-        print(f"Model successfully merged and saved to '{merged_model_path}'")
+        print(f">>> Model merged successfully to: {merged_model_path}")
 
-        # --- 2. Set up llama.cpp for GGUF Conversion ---
-        print(">>> Step 2: Setting up llama.cpp for GGUF conversion...")
+        # Now use the successful approach: load with transformers and save merged
+        print(">>> Step 3: Loading merged model with transformers...")
+        merged_model = AutoModelForCausalLM.from_pretrained(
+            merged_model_path,
+            device_map="auto",
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True
+        )
+
+        # Save in standard format
+        final_merged_path = os.path.join(output_dir, "merged-model")
+        print(f">>> Saving merged model to: {final_merged_path}")
+        merged_model.save_pretrained(final_merged_path)
+        tokenizer.save_pretrained(final_merged_path)
+
+        # --- Step 4: Convert to GGUF using llama.cpp ---
+        print(">>> Step 4: Setting up llama.cpp for conversion...")
         if not os.path.exists(llama_cpp_repo):
             print(f"'{llama_cpp_repo}' not found. Cloning from GitHub...")
             run_command("git clone https://github.com/ggerganov/llama.cpp.git")
@@ -87,17 +107,14 @@ def export_to_gguf():
         print("Installing llama.cpp Python requirements...")
         run_command(f"pip install -r {os.path.join(llama_cpp_repo, 'requirements.txt')}")
 
-        # --- 3. Convert directly to quantized GGUF ---
-        print(f">>> Step 3: Converting the merged model directly to {quantization_method.upper()} GGUF format...")
+        # Run the conversion command exactly as you did successfully
+        gguf_output_path = os.path.join(output_dir, f"sancaktepe-model-{quantization_method.upper()}.gguf")
+        print(f">>> Converting to GGUF format: {gguf_output_path}")
+
         convert_script_path = os.path.join(llama_cpp_repo, "convert_hf_to_gguf.py")
+        conversion_cmd = f"python {convert_script_path} {final_merged_path} --outfile {gguf_output_path} --outtype {quantization_method.lower()}"
 
-        # Use the quantization method directly during conversion
-        direct_conversion_cmd = (
-            f"python {convert_script_path} {merged_model_path}"
-            f" --outfile {gguf_output_path} --outtype {quantization_method.lower()}"
-        )
-
-        run_command(direct_conversion_cmd)
+        run_command(conversion_cmd)
 
         print(f"\n✅ Successfully created quantized GGUF model at: {gguf_output_path}")
         print("You can now use this file with tools like Ollama or LM Studio.")
