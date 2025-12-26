@@ -22,6 +22,10 @@ def export_to_gguf():
     """
     Merges the fine-tuned LoRA adapters and converts the model to GGUF format.
     """
+    # Set environment variable to accept system package installations automatically
+    import os
+    os.environ["UNSLOTH_INSTALL_FORCE_ACCEPT"] = "1"
+
     lora_model_path = "my-finetuned-model"
     merged_model_path = "my-finetuned-merged"
     gguf_output_path = "sancaktepe-model.gguf"
@@ -46,8 +50,14 @@ def export_to_gguf():
         print(f"✅ Successfully created GGUF model at: {gguf_output_path} using Unsloth's built-in method")
         print("You can now use this file with tools like Ollama or LM Studio.")
         return
-    except AttributeError:
-        print(">>> Unsloth's built-in GGUF conversion not available, using llama.cpp method...")
+    except Exception as e:
+        # Check if it's specifically the AttributeError (method not available) or other errors
+        if isinstance(e, AttributeError):
+            print(">>> Unsloth's built-in GGUF conversion not available, using llama.cpp method...")
+        else:
+            print(f"Error during Unsloth's built-in GGUF conversion: {e}")
+            print(">>> Falling back to manual llama.cpp method...")
+
         # Fallback to manual merging and conversion
         model.save_pretrained_merged(merged_model_path, tokenizer, save_method="merged_16bit")
         print(f"Model successfully merged and saved to '{merged_model_path}'")
