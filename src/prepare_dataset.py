@@ -145,65 +145,125 @@ def identify_entities(text: str) -> Dict[str, List[str]]:
     }
 
     # Find person names (Turkish names)
-    name_pattern = r'\b([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,})\b'
-    entities['person_names'].extend(re.findall(name_pattern, text))
+    name_pattern = r'\b([A-Z][a-z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]{2,}\s+[A-Z][a-z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]{2,})\b'
+    try:
+        entities['person_names'].extend(re.findall(name_pattern, text))
+    except re.error:
+        print(f"Regex error in name_pattern: {name_pattern}")
+        pass
 
     # Find organizations/departments (Turkish organization names)
-    org_pattern = r'\b([A-Z][a-zşğıöüçİĞÜÖÇ]+\s+(Belediyesi|Bakanlığı|Kurumu|Ofisi|Dairesi| Müdürlüğü|Kurumu|A.Ş.|Ltd|Bölgesi|İlçesi|İli))\b'
-    entities['organizations'].extend(re.findall(org_pattern, text))
+    org_pattern = r'\b([A-Z][a-z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]+\s+(Belediyesi|Bakanlığı|Kurumu|Ofisi|Dairesi| Müdürlüğü|Kurumu|A\.Ş\.|Ltd|Bölgesi|İlçesi|İli))\b'
+    try:
+        entities['organizations'].extend(re.findall(org_pattern, text))
+    except re.error:
+        print(f"Regex error in org_pattern: {org_pattern}")
+        pass
 
     # Find titles and positions
-    title_pattern = r'\b((?:Başkan|Baskan|Koordinatörü| Müdürü|Mudur|Şefi|Seofi|Uzmanı|Uzm|Birimi|Birimi Müdürü|Baskan Yardımcısı|Baskan Yardimcisi|Genel Sekreter|Genel Sekreteri|Sekreteri|Sekreter|Sistem Uzmanı|Sistem Uzmani|Uzman|Memur|Birim Sorumlusu|Sorumlusu|Uzmanı|Doktor|Dr|Prof|Doçent|Yönetici|Yonetici|Sorumlu|Müdür|Müdür Yardımcısı|Mudur Yarcimcisi)\w*)\b'
-    entities['titles_positions'].extend(re.findall(title_pattern, text))
+    title_pattern = r'\b((?:Başkan|Baskan|Koordinatörü| Müdürü|Mudur|Şefi|Seofi|Uzmanı|Uzm|Birimi|Birimi Müdürü|Baskan Yardımcısı|Baskan Yardimcisi|Genel Sekreter|Genel Sekreteri|Sekreteri|Sekreter|Sistem Uzmanı|Sistem Uzmani|Uzman|Memur|Birim Sorumlusu|Sorumlusu|Uzmanı|Doktor|Dr|Prof|Doçent|Yönetici|Yonetici|Sorumlu|Müdür|Müdür Yardımcısı|Mudur Yarcimcisi)[\w]*)\b'
+    try:
+        entities['titles_positions'].extend(re.findall(title_pattern, text))
+    except re.error:
+        print(f"Regex error in title_pattern: {title_pattern}")
+        pass
 
     # Find full addresses (Turkish addresses)
-    address_pattern = r'([A-Z][a-zA-ZşğıöüçİĞÜÖÇ]+\s+[A-Z][a-zA-ZşğıöüçİĞÜÖÇ]+\s+(?=\d+|\w+\s+Caddesi|Sokak|Mahalle|Cad\.|Sok\.|No:|Mh\.|Mahallesi|Caddesi))'
-    entities['full_addresses'].extend(re.findall(address_pattern, text))
+    address_pattern = r'([A-Z][a-zA-Z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]+\s+[A-Z][a-zA-Z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]+\s+(?=\d+|\w+\s+Caddesi|Sokak|Mahalle|Cad\.|Sok\.|No:|Mh\.|Mahallesi|Caddesi))'
+    try:
+        entities['full_addresses'].extend(re.findall(address_pattern, text))
+    except re.error:
+        print(f"Regex error in address_pattern: {address_pattern}")
+        pass
 
     # Find locations (cities, districts)
-    location_pattern = r'\b([A-Z][a-zşğıöüçİĞÜÖÇ]+\s*(?:[Ii]lçesi|[Ii]li|Belediyesi|İlçesi|İli|Beldesi|Köyü|Mahallesi|Mh\.|Büyükbabası|Küçükbabası))\b'
-    entities['locations'].extend(re.findall(location_pattern, text))
+    location_pattern = r'\b([A-Z][a-z\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7]+\s*(?:[Ii]lçesi|[Ii]li|Belediyesi|İlçesi|İli|Beldesi|Köyü|Mahallesi|Mh\.|Büyükbabası|Küçükbabası))\b'
+    try:
+        entities['locations'].extend(re.findall(location_pattern, text))
+    except re.error:
+        print(f"Regex error in location_pattern: {location_pattern}")
+        pass
 
     # Find phone numbers
     phone_pattern = r'(\d{3}\s?\d{3}\s?\d{2}\s?\d{2}|\(\d{3}\)\s?\d{3}\s?\d{2}\s?\d{2})'
-    entities['phone_numbers'].extend(re.findall(phone_pattern, text))
+    try:
+        entities['phone_numbers'].extend(re.findall(phone_pattern, text))
+    except re.error:
+        print(f"Regex error in phone_pattern: {phone_pattern}")
+        pass
 
     # Find emails
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    entities['emails'].extend(re.findall(email_pattern, text))
+    try:
+        entities['emails'].extend(re.findall(email_pattern, text))
+    except re.error:
+        print(f"Regex error in email_pattern: {email_pattern}")
+        pass
 
     # Find URLs
     url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
-    entities['urls'].extend(re.findall(url_pattern, text))
+    try:
+        entities['urls'].extend(re.findall(url_pattern, text))
+    except re.error:
+        print(f"Regex error in url_pattern: {url_pattern}")
+        pass
 
     # Find dates (Turkish formats)
     date_pattern = r'\b(\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{1,2}\s+(?:Ocak|Şubat|Mart|Nisan|Mayıs|Haziran|Temmuz|Ağustos|Eylül|Ekim|Kasım|Aralık|Ock|Şbt|Mrt|Nsn|May|Hzr|Tmm|Ağs|Eyl|Ekm|Ksm|Arl|Oca|Sub|Mar|Nis|Haz|Tem|Agu|Eyl|Eki|Kas|Ara)\s+\d{4})\b'
-    entities['dates'].extend(re.findall(date_pattern, text))
+    try:
+        entities['dates'].extend(re.findall(date_pattern, text))
+    except re.error:
+        print(f"Regex error in date_pattern: {date_pattern}")
+        pass
 
     # Find monetary values
     monetary_pattern = r'(\d+[\.,]?\d*\s*(?:TL|TRY|USD|EUR|GBP|dolar|euro|pound|sterlin))'
-    entities['monetary_values'].extend(re.findall(monetary_pattern, text))
+    try:
+        entities['monetary_values'].extend(re.findall(monetary_pattern, text))
+    except re.error:
+        print(f"Regex error in monetary_pattern: {monetary_pattern}")
+        pass
 
     # Find quantities
     quantity_pattern = r'(\d+\s*(?:kg|ton|metre|km|m|cm|mm|lt|L|litre|adet|tane|parça|kutu|koli|gr|mg|ml))'
-    entities['quantities'].extend(re.findall(quantity_pattern, text))
+    try:
+        entities['quantities'].extend(re.findall(quantity_pattern, text))
+    except re.error:
+        print(f"Regex error in quantity_pattern: {quantity_pattern}")
+        pass
 
     # Find document types
     doc_pattern = r'\b((?:belgesi|formu|talep|ihtiyacı|gerekli|gereken)\w+)'
-    entities['document_types'].extend(re.findall(doc_pattern, text))
+    try:
+        entities['document_types'].extend(re.findall(doc_pattern, text))
+    except re.error:
+        print(f"Regex error in doc_pattern: {doc_pattern}")
+        pass
 
     # Find list items
-    list_pattern = r'[-*+]\s+([^(?:\n\s*[-*+]|$)]+?)(?=\n\s*[-*+]|$)'
-    entities['list_items'].extend(re.findall(list_pattern, text)[:20])
+    list_pattern = r'[+*-]\s+([^\n\r]+)'
+    try:
+        entities['list_items'].extend(re.findall(list_pattern, text)[:20])
+    except re.error:
+        print(f"Regex error in list_pattern: {list_pattern}")
+        pass
 
     # Find IDs and codes
     id_pattern = r'\b(\d{6,}|\w{2,}-?\d{2,}|\d{2,}-?\w{2,})\b'
-    entities['ids_codes'].extend(re.findall(id_pattern, text))
+    try:
+        entities['ids_codes'].extend(re.findall(id_pattern, text))
+    except re.error:
+        print(f"Regex error in id_pattern: {id_pattern}")
+        pass
 
     # Additional pattern for specific Turkish entities
     # Find product names or specific items
-    product_pattern = r'\b([A-Z][a-zA-Z0-9şğıöüçİĞÜÖÇ\s]{3,}(?:sistem|platform|uygulama|program|proje|projemiz|sistemimiz|uygulamamız|platformumuz))\b'
-    entities['product_names'].extend(re.findall(product_pattern, text))
+    product_pattern = r'\b([A-Z][a-zA-Z0-9\u015F\u011F\u00F6\u00FC\u00E7\u0130\u011E\u00DC\u00D6\u00C7\s]{3,}(?:sistem|platform|uygulama|program|proje|projemiz|sistemimiz|uygulamamız|platformumuz))\b'
+    try:
+        entities['product_names'].extend(re.findall(product_pattern, text))
+    except re.error:
+        print(f"Regex error in product_pattern: {product_pattern}")
+        pass
 
     # Remove duplicates and return
     for key in entities:
@@ -280,6 +340,8 @@ def generate_response_with_ollama(prompt: str) -> str:
 
 def generate_synthetic_qa_with_ollama(chunk_text: str) -> List[Dict[str, str]]:
     """Generate synthetic QA pairs from chunk text using Ollama for better quality."""
+    print(f"[INFO] Starting Ollama-enhanced QA generation for chunk of {len(chunk_text)} characters")
+
     qa_pairs = []
 
     # Create prompt for LLM to generate relevant questions based on the chunk
@@ -301,29 +363,70 @@ def generate_synthetic_qa_with_ollama(chunk_text: str) -> List[Dict[str, str]]:
     """
 
     # Get response from Ollama
-    llm_response = generate_response_with_ollama(prompt)
+    try:
+        print("[INFO] Sending request to Ollama API for QA generation...")
+        llm_response = generate_response_with_ollama(prompt)
+        print(f"[INFO] Received response from Ollama API (length: {len(llm_response) if llm_response else 0})")
 
-    if llm_response:
-        try:
-            # Try to parse the JSON response
-            import ast
-            qa_list = ast.literal_eval(llm_response)
+        if llm_response:
+            # Try to parse the JSON response using multiple approaches
+            parsed_successfully = False
 
-            # Convert to our format
-            for item in qa_list:
+            # First, try regular JSON parsing
+            try:
+                import json
+                qa_list = json.loads(llm_response)
+                parsed_successfully = True
+                print(f"[INFO] Successfully parsed JSON response, found {len(qa_list) if isinstance(qa_list, list) else 0} QA pairs")
+            except:
+                # If that fails, try ast.literal_eval
+                try:
+                    import ast
+                    qa_list = ast.literal_eval(llm_response)
+                    parsed_successfully = True
+                    print(f"[INFO] Successfully parsed with ast.literal_eval, found {len(qa_list) if isinstance(qa_list, list) else 0} QA pairs")
+                except:
+                    # If that fails, try extracting the JSON-like portion using regex
+                    import re
+                    json_matches = re.search(r'\[[^\[]*\{.*\}.*\]', llm_response, re.DOTALL)
+                    if json_matches:
+                        try:
+                            import ast
+                            qa_list = ast.literal_eval(json_matches.group())
+                            parsed_successfully = True
+                            print(f"[INFO] Successfully extracted and parsed JSON portion, found {len(qa_list) if isinstance(qa_list, list) else 0} QA pairs")
+                        except:
+                            print("[WARNING] Could not parse QA pairs from response, using fallback method")
+                            pass
+
+            if parsed_successfully:
+                # Convert to our format
+                valid_pairs_count = 0
+                for item in qa_list:
+                    if isinstance(item, dict) and "input" in item and "output" in item:
+                        qa_pairs.append({
+                            "instruction": "Sancaktepe belediyesiyle ilgili aşağıdaki bilgileri doğru ve eksiksiz şekilde aktarın.",
+                            "input": item["input"],
+                            "output": item["output"]
+                        })
+                        valid_pairs_count += 1
+
+                print(f"[INFO] Added {valid_pairs_count} valid QA pairs from Ollama API")
+            else:
+                # If parsing fails, create basic Q&A from the response
                 qa_pairs.append({
                     "instruction": "Sancaktepe belediyesiyle ilgili aşağıdaki bilgileri doğru ve eksiksiz şekilde aktarın.",
-                    "input": item["input"],
-                    "output": item["output"]
+                    "input": "Bu belgede hangi konular ele alınmaktadır?",
+                    "output": llm_response[:500]  # Limit length
                 })
-        except:
-            # If JSON parsing fails, create basic Q&A from the response
-            qa_pairs.append({
-                "instruction": "Sancaktepe belediyesiyle ilgili aşağıdaki bilgileri doğru ve eksiksiz şekilde aktarın.",
-                "input": "Bu belgede hangi konular ele alınmaktadır?",
-                "output": llm_response[:500]  # Limit length
-            })
+                print("[INFO] Added 1 fallback QA pair from Ollama API response")
+        else:
+            print("[WARNING] No response from Ollama API")
+    except Exception as e:
+        print(f"[ERROR] Error in Ollama API call or QA generation: {e}")
+        # Return empty list, but other QA generation methods will still work
 
+    print(f"[INFO] Completed Ollama-enhanced QA generation, returning {len(qa_pairs)} QA pairs")
     return qa_pairs
 
 def generate_synthetic_qa(chunk_text: str, entities: Dict[str, List[str]]) -> List[Dict[str, str]]:
