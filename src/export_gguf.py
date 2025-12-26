@@ -20,7 +20,7 @@ def run_command(command):
 
 def export_to_gguf():
     """
-    Merges the fine-tuned LoRA adapters and converts the model to GGUF format.
+    Merges the fine-tuned LoRA adapters and converts the model to proper GGUF format.
     """
     # Set environment variable to accept system package installations automatically
     import os
@@ -33,6 +33,9 @@ def export_to_gguf():
     except ImportError:
         # dotenv is not required, just load environment variables from system
         pass
+
+    # Get quantization method from environment variable
+    quantization_method = os.getenv("GGUF_QUANTIZATION", "q8_0")
 
     # Create output directory if it doesn't exist
     output_dir = "output"
@@ -57,21 +60,18 @@ def export_to_gguf():
         load_in_4bit=True,
     )
 
-    # Use Unsloth's built-in method for GGUF conversion if available (newer versions)
+    # Use Unsloth's built-in method for GGUF conversion with proper quantization
     try:
-        model.save_pretrained_gguf(gguf_output_path, tokenizer, quantization_method="q8_0")
-        print(f"✅ Successfully created GGUF model at: {gguf_output_path} using Unsloth's built-in method")
+        print(f">>> Using quantization method: {quantization_method}")
+        model.save_pretrained_gguf(gguf_output_path, tokenizer, quantization_method=quantization_method)
+        print(f"✅ Successfully created GGUF model at: {gguf_output_path} using Unsloth's built-in method with {quantization_method} quantization")
         print("You can now use this file with tools like Ollama or LM Studio.")
         return
     except Exception as e:
-        # Check if it's specifically the AttributeError (method not available) or other errors
-        if isinstance(e, AttributeError):
-            print(">>> Unsloth's built-in GGUF conversion not available, using llama.cpp method...")
-        else:
-            print(f"Error during Unsloth's built-in GGUF conversion: {e}")
-            print(">>> Falling back to manual llama.cpp method...")
+        print(f"Error during Unsloth's built-in GGUF conversion: {e}")
+        print(">>> Falling back to manual llama.cpp method...")
 
-        # Fallback to manual merging and conversion
+        # Manual method as fallback
         model.save_pretrained_merged(merged_model_path, tokenizer, save_method="merged_16bit")
         print(f"Model successfully merged and saved to '{merged_model_path}'")
 
@@ -87,21 +87,19 @@ def export_to_gguf():
         print("Installing llama.cpp Python requirements...")
         run_command(f"pip install -r {os.path.join(llama_cpp_repo, 'requirements.txt')}")
 
-        # --- 3. Convert to GGUF ---
-        print(">>> Step 3: Converting the merged model to GGUF format...")
-        convert_script_path = os.path.join(llama_cpp_repo, "convert.py")
+        # --- 3. Convert directly to quantized GGUF ---
+        print(f">>> Step 3: Converting the merged model directly to {quantization_method.upper()} GGUF format...")
+        convert_script_path = os.path.join(llama_cpp_repo, "convert_hf_to_gguf.py")
 
-        # We use f16 (float16) as it's a common and compatible type for GGUF conversion.
-        # Other types like q4_k_m can be used for smaller file sizes.
-        conversion_command = (
+        # Use the quantization method directly during conversion
+        direct_conversion_cmd = (
             f"python {convert_script_path} {merged_model_path}"
-            f" --outfile {gguf_output_path}"
-            f" --outtype f16" # Using f16 for high quality, can be changed to q4_k_m for smaller size
+            f" --outfile {gguf_output_path} --outtype {quantization_method.lower()}"
         )
 
-        run_command(conversion_command)
+        run_command(direct_conversion_cmd)
 
-        print(f"\n✅ Successfully created GGUF model at: {gguf_output_path}")
+        print(f"\n✅ Successfully created quantized GGUF model at: {gguf_output_path}")
         print("You can now use this file with tools like Ollama or LM Studio.")
 
 
