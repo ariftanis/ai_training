@@ -34,9 +34,14 @@ def export_to_gguf():
         # dotenv is not required, just load environment variables from system
         pass
 
+    # Create output directory if it doesn't exist
+    output_dir = "output"
+    os.makedirs(output_dir, exist_ok=True)
+
     lora_model_path = "my-finetuned-model"
     merged_model_path = "my-finetuned-merged"
-    gguf_output_path = os.getenv("GGUF_OUTPUT_NAME", "sancaktepe-model.gguf")
+    gguf_output_name = os.getenv("GGUF_OUTPUT_NAME", "sancaktepe-model.gguf")
+    gguf_output_path = os.path.join(output_dir, gguf_output_name)  # Save to output directory
     llama_cpp_repo = "llama.cpp"
 
     # --- 1. Merge LoRA Adapters ---

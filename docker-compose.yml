@@ -12,6 +12,8 @@ services:
       - ./dataset.jsonl:/app/dataset.jsonl
       # Mount the output model directory to persist the trained model on your host machine
       - ./my-finetuned-model:/app/my-finetuned-model
+      # Mount GGUF output directory to persist GGUF models on your host machine
+      - ./output:/app/output
     deploy:
       resources:
         reservations:
