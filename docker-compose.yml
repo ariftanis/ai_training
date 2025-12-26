@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    network_mode: "bridge"  # Use bridge mode but add host alias
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # This maps to the host gateway IP in Docker
     volumes:
       # Mount the documents directory to provide data for preparation
       - ./documents:/app/documents:ro

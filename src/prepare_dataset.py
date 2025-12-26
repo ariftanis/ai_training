@@ -273,8 +273,33 @@ def identify_entities(text: str) -> Dict[str, List[str]]:
 
 def generate_response_with_ollama(prompt: str) -> str:
     """Use Ollama service to generate responses based on prompt."""
-    # Use .env first, fallback to Docker host (works on Windows/Mac/Windows)
-    base_url = os.getenv('OLLAMA_API_BASE_URL', 'http://host.docker.internal:11434').rstrip('/')
+    # Try different host addresses to reach Ollama from Docker container
+    base_urls = [
+        os.getenv('OLLAMA_API_BASE_URL', ''),  # First try environment variable
+        'http://host.docker.internal:11434',    # Docker Desktop default
+        'http://docker.host.internal:11434',    # Alternative for Docker Desktop
+        'http://172.17.0.1:11434',              # Default Docker bridge gateway
+        'http://172.18.0.1:11434',              # Alternative Docker network
+        'http://localhost:11434',               # Fallback
+        'http://127.0.0.1:11434'                # Direct IP fallback
+    ]
+
+    # Clean up base URL from env var
+    base_url = ''
+    for url in base_urls:
+        if url:  # Skip empty env var
+            base_url = url.rstrip('/')
+            break
+
+    # Set default if not found
+    if not base_url:
+        # On Linux, host.docker.internal might not work, so try common host addresses
+        import platform
+        if platform.system().lower() == 'linux':
+            base_url = 'http://172.17.0.1:11434'  # Docker bridge on Linux
+        else:
+            base_url = 'http://host.docker.internal:11434'  # Default for Windows/MacOS
+
     url = f"{base_url}/api/chat"  # Ollama endpoint (also works with LM Studio in Ollama compatibility mode)
 
     OLLAMA_MODEL_NAME = os.getenv(
@@ -311,32 +336,43 @@ def generate_response_with_ollama(prompt: str) -> str:
         'User-Agent': 'curl/7.81.0',   # mimics curl – helps with some servers
     }
 
-    try:
-        response = requests.post(url, json=payload, headers=headers, timeout=600)
-        response.raise_for_status()
-        data = response.json()
+    # Try connection with different base URLs
+    for attempt_url in [base_url] + [u for u in base_urls[1:] if u and u != base_url]:
+        try:
+            url = f"{attempt_url}/api/chat"
+            print(f"[DEBUG] Attempting Ollama connection to: {url}")
 
-        # Unified response parsing (works with Ollama and OpenAI-compatible servers)
-        if "choices" in data and len(data["choices"]) > 0:
-            # OpenAI / LM Studio format
-            response_text = data["choices"][0]["message"]["content"]
-        elif "message" in data and "content" in data["message"]:
-            # Pure Ollama format
-            response_text = data["message"]["content"]
-        else:
-            response_text = str(data)
+            response = requests.post(url, json=payload, headers=headers, timeout=600)
+            response.raise_for_status()
+            data = response.json()
 
-        # Remove any leftover markdown code blocks (just in case)
-        clean_text = re.sub(r'```[\s\S]*?```', '', response_text, flags=re.IGNORECASE).strip()
+            # Unified response parsing (works with Ollama and OpenAI-compatible servers)
+            if "choices" in data and len(data["choices"]) > 0:
+                # OpenAI / LM Studio format
+                response_text = data["choices"][0]["message"]["content"]
+            elif "message" in data and "content" in data["message"]:
+                # Pure Ollama format
+                response_text = data["message"]["content"]
+            else:
+                response_text = str(data)
 
-        return clean_text
+            # Remove any leftover markdown code blocks (just in case)
+            clean_text = re.sub(r'```[\s\S]*?```', '', response_text, flags=re.IGNORECASE).strip()
 
-    except requests.exceptions.RequestException as e:
-        print(f"Ollama API error: {e}")
-        return ""
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return ""
+            print(f"[INFO] Successfully connected to Ollama at {attempt_url}")
+            return clean_text
+
+        except requests.exceptions.RequestException as e:
+            print(f"[WARNING] Failed to connect to Ollama at {attempt_url}: {e}")
+            continue  # Try next URL
+        except Exception as e:
+            print(f"[ERROR] Unexpected error connecting to Ollama at {attempt_url}: {e}")
+            continue  # Try next URL
+
+    # If all attempts failed
+    print(f"[ERROR] All Ollama connection attempts failed. Please ensure Ollama is running on your host machine and accessible from the container.")
+    print(f"[HINT] Run 'ollama serve' on your host and verify you can reach it from the container.")
+    return ""
 
 def generate_synthetic_qa_with_ollama(chunk_text: str) -> List[Dict[str, str]]:
     """Generate synthetic QA pairs from chunk text using Ollama for better quality."""
