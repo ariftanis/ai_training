@@ -9,8 +9,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"  # This maps to the host gateway IP in Docker
     volumes:
-      # Mount the documents directory to provide data for preparation
-      - ./documents:/app/documents:ro
       # Mount the dataset file so it's persisted after creation
       - ./dataset.jsonl:/app/dataset.jsonl
       # Mount the output model directory to persist the trained model on your host machine

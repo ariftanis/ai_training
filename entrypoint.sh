@@ -16,12 +16,7 @@ if [ ! -f "$MODEL_FILE" ]; then
     echo ">>> Cleaning model directory for fresh start..."
     rm -rf /app/my-finetuned-model/*
 
-    # Step 1: Prepare the dataset
-    echo
-    echo ">>> Running dataset preparation..."
-    python3 src/prepare_dataset.py
-
-    # Step 2: Run the training
+    # Step 1: Run the training
     echo
     echo ">>> Running model training..."
     python3 src/train.py
