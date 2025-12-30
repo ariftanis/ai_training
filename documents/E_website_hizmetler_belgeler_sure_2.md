@@ -19,38 +19,23 @@
 Sıhhi Müessese İşyeri Açma ve Çalışma Ruhsatları
 
 1-Başvuru Formu
-
 2-Maliye Vergi Levhası Fotokopisi,
-
 3-2 Adet Fotoğraf,
-
 4-Ustalık Belgesi,
-
 5-Kiracı ise Kira Kontratı Fotokopisi,
-
 6-Esnaf Sicil Ticaret Oda veya Sanayi Oda Kaydı,
-
 7-Faaliyet Belgesi,
-
 8-Ticaret Sicil Gazetesi ve imza Sirküsü,
-
 9-Motor Beyannamesi,(İşyerinde motor çalıştıracaksa)
-
 10-Tapu Fotokopisi,
-
 11-Yapı Kullanma izin Belgesi,
-
 12-İtfaiye Raporu,
-
 13-Yangın Söndürme Tüpü Faturası Fotokopisi,
-
 14-Portör Muayene Raporu,
-
 15-Sorumlu Müdürlük Sözleşmesi,
-
 16-Hekim Sözleşmesi, (50 kişiden fazla işçi çalıştıran yerler)
 
-2 GÜN
+Tahmini işlem süresi 2 Gündür
 
 **2**
 

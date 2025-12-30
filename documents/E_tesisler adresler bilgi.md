@@ -28,7 +28,7 @@ Sancaktepe'deki kreş, çocuk bakım evleri, park ve bahçeler, spor merkezleri,
 - **Sancaktepe Belediyesi: Hanımeli Cafe:**
     - **Konum:** Eyüp Sultan Mahallesi
     - **Hizmetler:** 146 kişi kapasiteli kafe, çocuk parkı ve müzikli etkinlikler sunmaktadır.
-    - **İstatistik (2023):** 27 Nisan - 31 Aralık arasında 36.485.625 kişiye hizmet verilmiştir.
+    - **İstatistik (2023):** 27 Nisan - 31 Aralık arasında 36.485 kişiye hizmet verilmiştir.
 
 - **Sancaktepe Belediyesi: Koru Sosyal Cafe:**
     - **Konum:** Abdurrahmangazi Mahallesi, Alparslan Caddesi Koru Park İçi

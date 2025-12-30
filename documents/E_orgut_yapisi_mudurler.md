@@ -66,12 +66,16 @@ Aykut UZUN Afet İşleri Müdürü'dür
 # Sancaktepe Belediyesi Güncel Organizasyon Şeması ve Personel Listesi (2025)
 
 ## Belediye Başkanı
-- Belediye Başkanı: Şadi YAZICI (belgede geçmese de bilinen başkan)
+- Belediye Başkanı: Alper YEĞİN (belgede geçmese de bilinen başkan)
 
-## Başkan Yardımcıları (3 kişi)
-- Dr. Abdullah İNAN → Belediye Başkan Yardımcısı + Sağlık İşleri Müdür Vekili
-- Hüseyin KILIÇ → Belediye Başkan Yardımcısı + Gençlik ve Spor Hizmetleri Müdür Vekili + Kültür ve Sosyal İşler Müdürü
-- Zeynep KARAMAN → Belediye Başkan Yardımcısı + Kadın ve Aile Hizmetleri Müdür Vekili
+## Başkan Yardımcıları (7 kişi)
+- Dr. Abdullah İNAN 
+- Gökhan ERDOĞAN
+- Gülay ÇELİKEL
+- Hüseyin KILIÇ
+- Nevzat KILIÇ
+- Selçuk CEBİR
+- Zeynep KARAMAN
 
 ## Tüm Müdürlükler ve Sorumlu Kişiler (31 Müdürlük – Güncel Kadro)
 
