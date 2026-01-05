@@ -41,4 +41,4 @@ ENTRYPOINT ["./entrypoint.sh"]
 
 # Set the default command to run the inference script.
 # This command will be executed by the entrypoint script after the training check.
-CMD ["python3", "src/inference.py", "Sancaktepe belediye başkanı kimdir?"]
+CMD ["python3", "src/inference.py", "Sancaktepe belediyesi çocuklara yönelik ne gibi hizmetler üretiyor?"]

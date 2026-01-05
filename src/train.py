@@ -113,7 +113,7 @@ import builtins
 builtins.psutil = psutil
 
 # 6. Trainer for optimal information injection with environment variables
-num_epochs = int(os.getenv("NUM_EPOCHS", "3"))  # Increased epochs for better information injection
+num_epochs = int(os.getenv("NUM_EPOCHS", "2"))  # Increased epochs for better information injection
 batch_size = int(os.getenv("BATCH_SIZE", "1"))  # Adjusted for larger model to manage memory
 gradient_accumulation = int(os.getenv("GRADIENT_ACCUMULATION_STEPS", "8"))  # Increased for better gradient estimates
 warmup_steps = int(os.getenv("WARMUP_STEPS", "50"))  # Increased for more stable training
