@@ -6,8 +6,11 @@ def validate_dataset():
     """
     Validates the dataset for quality and correctness
     """
-    dataset_file = 'dataset.jsonl'
-    
+    # Check for cleaned dataset first, then original dataset
+    dataset_file = 'cleaned_dataset.jsonl'
+    if not os.path.exists(dataset_file):
+        dataset_file = 'dataset.jsonl'
+
     if not os.path.exists(dataset_file):
         print(f"Error: Dataset file '{dataset_file}' does not exist.")
         print("Please run prepare_dataset.py first.")
