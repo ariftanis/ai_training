@@ -43,6 +43,19 @@ huggingface_hub.utils.tqdm.disable = False
 # 1. Load the dataset
 dataset = load_dataset("json", data_files="dataset.jsonl", split="train")
 
+# Add a validation step here
+print("Dataset loaded successfully. Validating schema...")
+# Check if all required columns are present and have the correct type
+required_columns = {"instruction": "string", "input": "string", "output": "string"}
+for col, expected_type in required_columns.items():
+    if col not in dataset.column_names:
+        raise ValueError(f"Missing required column: {col}")
+    if str(dataset.features[col].dtype) != expected_type:
+        raise ValueError(f"Column '{col}' has unexpected type: {dataset.features[col].dtype}, expected {expected_type}")
+
+print("Dataset schema validated successfully.")
+sys.exit(0) # Exit after validation
+
 # 3. Model Configuration from environment variables
 model_name = os.getenv("MODEL_NAME", "unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit")  # Default to Llama 3.1 8B
 max_seq_length = int(os.getenv("MAX_SEQ_LENGTH", "8192"))  # Increased for larger model and context
