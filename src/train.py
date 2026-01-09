@@ -212,6 +212,7 @@ batch_size = int(os.getenv("BATCH_SIZE", "1"))  # Adjusted for larger model to m
 gradient_accumulation = int(os.getenv("GRADIENT_ACCUMULATION_STEPS", "8"))  # Increased for better gradient estimates
 warmup_steps = int(os.getenv("WARMUP_STEPS", "50"))  # Increased for more stable training
 learning_rate = float(os.getenv("LEARNING_RATE", "2e-4"))  # Standard learning rate for LoRA
+weight_decay = float(os.getenv("WEIGHT_DECAY", "0.01"))  # Weight decay for regularization
 output_dir = os.getenv("OUTPUT_DIR", "outputs")
 save_strategy = os.getenv("SAVE_STRATEGY", "epoch")  # Save checkpoint at each epoch
 
@@ -228,6 +229,7 @@ trainer = SFTTrainer(
         warmup_steps=warmup_steps,  # From environment variable
         num_train_epochs=num_epochs,  # From environment variable
         learning_rate=learning_rate,  # From environment variable
+        weight_decay=weight_decay,  # From environment variable
         fp16=not torch.cuda.is_bf16_supported(),
         bf16=torch.cuda.is_bf16_supported(),
         logging_steps=10,  # Balanced logging frequency

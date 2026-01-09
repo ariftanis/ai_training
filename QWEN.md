@@ -112,7 +112,7 @@ D:\2025-12-30-PROJECTS\2025-13-30-QLoRA_Ai_training\ai_training\
 The `.env` file contains configurable parameters:
 - Model selection and sequence length
 - LoRA parameters (rank, alpha, dropout)
-- Training parameters (epochs, batch size, learning rate)
+- Training parameters (epochs, batch size, learning rate, weight decay)
 - Dataset processing settings
 - GGUF export configuration
 - Quantization preferences for GGUF output
